@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  wordpress:
+    image: wordpress:latest
+    links:
+    - mariadb:mysql
+    environment:
+    - WORDPRESS_DB_PASSWORD=password
+    - WORDPRESS_DB_USER=root
+    ports:
+    - "public_ip:80:80"
+    volumes:
+    - ./html:/var/www/html
+  mariadb:
+    image: mariadb
+    environment:
+    - MYSQL_ROOT_PASSWORD=password
+    - MYSQL_DATABASE=wordpress
+    - MYSQL_USER=wp_user
+    - MYSQL_PASSWORD=password
+    volumes:
+    - ./database:/var/lib/mysql
+volumes:
+  html:
+  database:
