@@ -1,0 +1,68 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:1.15.7-alpine
+    container_name: nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx:/etc/nginx
+      - ./logs/nginx:/var/log/nginx
+      - ./wordpress:/var/www/html
+      - ./certs:/etc/letsencrypt
+      - ./certs-data:/data/letsencrypt
+    links:
+      - strona1
+      - strona2
+    restart: always
+    networks:
+      - wp-network
+
+  mysql:
+    image: mariadb
+    container_name: mysql
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    restart: always
+    networks:
+      - wp-network
+
+  strona1:
+    image: wordpress:6.0.1-fpm-alpine
+    container_name: strona1
+    volumes:
+      - ./wordpress/site1:/var/www/html/
+      - ./php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    environment:
+      - WORDPRESS_DB_NAME=strona1
+      - WORDPRESS_TABLE_PREFIX=wp_
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_PASSWORD=password
+    links:
+      - mysql
+    restart: always
+    networks:
+      - wp-network
+
+  strona2:
+    image: wordpress:6.0.1-fpm-alpine
+    container_name: strona2
+    volumes:
+      - ./wordpress/site2:/var/www/html/
+      - ./php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    environment:
+      - WORDPRESS_DB_NAME=strona2
+      - WORDPRESS_TABLE_PREFIX=wp_
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_PASSWORD=password
+    links:
+      - mysql
+    restart: always
+    networks:
+      - wp-network
+networks:
+  wp-network:
+    driver: bridge
